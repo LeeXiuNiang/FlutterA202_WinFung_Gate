@@ -9,8 +9,8 @@ $result = $conn->query($sqllogin);
 
 if ($result->num_rows > 0) {
     while ($row = $result ->fetch_assoc()){
-        //echo $data = "success,".$row["username"].",".$row["date_reg"].";
-        echo "success";
+        echo $data = "success,".$row["username"].",".$row["date_reg"];
+        //echo "success";
     }
 }else{
     echo "failed";

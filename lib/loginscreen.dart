@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 
 import 'mainscreen.dart';
 import 'registrationscreen.dart';
+import 'user.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -187,21 +188,7 @@ class _LoginScreenState extends State<LoginScreen> {
             "https://www.crimsonwebs.com/s272033/winfunggate/php/login_user.php"),
         body: {"email": _email, "password": _password}).then((response) {
       print(response.body);
-      if (response.body == "success") {
-        Fluttertoast.showToast(
-            msg: "Login Success",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Theme.of(context).accentColor,
-            textColor: Colors.white,
-            fontSize: 16.0);
-        pr.hide().then((isHidden) {
-          print(isHidden);
-        });
-        Navigator.push(
-            context, MaterialPageRoute(builder: (content) => MainScreen()));
-      } else {
+      if (response.body == "failed") {
         Fluttertoast.showToast(
             msg: "Login Failed",
             toastLength: Toast.LENGTH_SHORT,
@@ -213,6 +200,31 @@ class _LoginScreenState extends State<LoginScreen> {
         pr.hide().then((isHidden) {
           print(isHidden);
         });
+        
+      } else {
+
+        Fluttertoast.showToast(
+            msg: "Login Success",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Theme.of(context).accentColor,
+            textColor: Colors.white,
+            fontSize: 16.0);
+        List userdata = response.body.split(",");
+        User user = User(
+            email: _email,
+            password: _password,
+            username: userdata[1],
+            datereg: userdata[2],
+            );
+        pr.hide().then((isHidden) {
+          print(isHidden);
+        });
+        Navigator.push(
+            context, MaterialPageRoute(builder: (content) => MainScreen(user: user)));
+
+        
       }
     });
   }
