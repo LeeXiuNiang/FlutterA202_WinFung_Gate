@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 
+import 'checkoutpage.dart';
 import 'mainscreen.dart';
 import 'user.dart';
 
@@ -330,14 +331,17 @@ class _CartPageState extends State<CartPage> {
                 ),
                 actions: <Widget>[
                   TextButton(
-                    child: Text("Yes",style: TextStyle(color: Theme.of(context).accentColor)),
+                    child: Text("Yes",
+                        style: TextStyle(color: Theme.of(context).accentColor)),
                     onPressed: () {
                       Navigator.of(context).pop();
                       _deleteCart(index);
                     },
                   ),
                   TextButton(
-                      child: Text("No",style: TextStyle(color: Theme.of(context).accentColor)),
+                      child: Text("No",
+                          style:
+                              TextStyle(color: Theme.of(context).accentColor)),
                       onPressed: () {
                         Navigator.of(context).pop();
                       }),
@@ -369,13 +373,23 @@ class _CartPageState extends State<CartPage> {
                   ),
                   actions: <Widget>[
                     TextButton(
-                      child: Text("Yes",style: TextStyle(color: Theme.of(context).accentColor)),
+                      child: Text("Yes",
+                          style:
+                              TextStyle(color: Theme.of(context).accentColor)),
                       onPressed: () async {
                         Navigator.of(context).pop();
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => CheckOutScreen(
+                                user: widget.user, total: _totalprice),
+                          ),
+                        );
                       },
                     ),
                     TextButton(
-                        child: Text("No",style: TextStyle(color: Theme.of(context).accentColor)),
+                        child: Text("No",
+                            style: TextStyle(
+                                color: Theme.of(context).accentColor)),
                         onPressed: () {
                           Navigator.of(context).pop();
                         }),
