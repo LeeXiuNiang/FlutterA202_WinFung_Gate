@@ -794,14 +794,16 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0))),
                 title: new Text(
-                  "Make order with total amount payable of RM"+ widget.total.toStringAsFixed(2) + "?",
+                  "Place order with total amount payable of RM"+ widget.total.toStringAsFixed(2) + "?",
                   style: TextStyle(
                     color: Colors.black,
                   ),
                 ),
                 actions: <Widget>[
                   TextButton(
-                    child: Text("Yes"),
+                    child: Text("Yes",
+                          style:
+                              TextStyle(color: Theme.of(context).accentColor)),
                     onPressed: () async {
                       Navigator.of(context).pop();
                       Order _order = new Order(
@@ -821,7 +823,9 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                     },
                   ),
                   TextButton(
-                      child: Text("No"),
+                      child: Text("No",
+                          style:
+                              TextStyle(color: Theme.of(context).accentColor)),
                       onPressed: () {
                         Navigator.of(context).pop();
                       }),
@@ -840,7 +844,9 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                 ),
                 actions: <Widget>[
                   TextButton(
-                    child: Text("Yes"),
+                    child: Text("Yes",
+                          style:
+                              TextStyle(color: Theme.of(context).accentColor)),
                     onPressed: () async {
                       Navigator.of(context).pop();
                       Order _order = new Order(
@@ -860,7 +866,9 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                     },
                   ),
                   TextButton(
-                      child: Text("No"),
+                      child: Text("No",
+                          style:
+                              TextStyle(color: Theme.of(context).accentColor)),
                       onPressed: () {
                         Navigator.of(context).pop();
                       }),
