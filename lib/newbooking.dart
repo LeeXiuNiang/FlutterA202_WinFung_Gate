@@ -1,33 +1,26 @@
-import 'package:flutter/material.dart';
 import 'package:date_format/date_format.dart';
+import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:intl/intl.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 import 'package:ndialog/ndialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:winfung_gate/order.dart';
-import 'package:winfung_gate/payscreen.dart';
+import 'package:winfung_gate/delivery.dart';
+import 'package:winfung_gate/mappage.dart';
+import 'package:winfung_gate/user.dart';
+import 'package:http/http.dart' as http;
 
-import 'delivery.dart';
-import 'mainscreen.dart';
-import 'mappage.dart';
-import 'user.dart';
-
-class CheckOutScreen extends StatefulWidget {
-  final double total;
+class NewBooking extends StatefulWidget {
   final User user;
 
-  const CheckOutScreen({Key key, this.user, this.total}) : super(key: key);
-  
+  const NewBooking({Key key, this.user}) : super(key: key);
+
   @override
-  _CheckOutScreenState createState() => _CheckOutScreenState();
+  _NewBookingState createState() => _NewBookingState();
 }
 
-class _CheckOutScreenState extends State<CheckOutScreen> {
-  int _radioValue = 0;
-  int _optionValue = 2;
-  String _name = "Click to set";
+class _NewBookingState extends State<NewBooking> with WidgetsBindingObserver {
   String _phone = "Click to set";
   TextEditingController nameController = new TextEditingController();
   TextEditingController phoneController = new TextEditingController();
@@ -44,22 +37,23 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
   TextEditingController _timeController = TextEditingController();
   String _setTime, _setDate;
   String _hour, _minute, _time;
-  bool _statusCash = true;
-  bool _statusOnline = false;
-  String _payMethod = "Cash";
-  String _payOption = "Deposit";
-  double totalPayable, payAmount=0;
-  String buttonText = "ORDER NOW";
 
   @override
   void initState() {
     super.initState();
-    _loadPref();
-
+    WidgetsBinding.instance.addObserver(this);
+    print("Init tab 0");
     _dateController.text = DateFormat('dd/MM/yyyy').format(DateTime.now());
     _timeController.text = formatDate(
-        DateTime(2019, 08, 1, DateTime.now().hour, DateTime.now().minute),
+        DateTime(2021, 05, 1, DateTime.now().hour, DateTime.now().minute),
         [hh, ':', nn, " ", am]).toString();
+  }
+
+  @override
+  void dispose() {
+    print("in dispose");
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   @override
@@ -70,53 +64,8 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
     String today = DateFormat('hh:mm a').format(now);
     String todaybanner = DateFormat('dd/MM/yyyy').format(now);
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: Text('Payment Checkout'),
-        backgroundColor: Color(0x44000000),
-      ),
       body: Column(
         children: [
-          Expanded(
-              flex: 3,
-              child: Stack(
-                children: [
-                  Container(
-                    width: screenWidth,
-                    color: Colors.red,
-                    child: Image.asset(
-                      'assets/images/payment.png',
-                      fit: BoxFit.fitWidth,
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 0.0,
-                    right: 0.0,
-                    left: 0.0,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Container(
-                              child: Text(
-                            todaybanner,
-                            style: TextStyle(
-                                fontSize: 20,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold),
-                          )),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              )),
-          SizedBox(height: 5),
-          Divider(
-            height: 1,
-            color: Colors.grey,
-          ),
           Expanded(
             flex: 7,
             child: ListView(
@@ -188,7 +137,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                     child: Column(
                       children: [
                         Text(
-                          "INSTALLATION DATE & TIME",
+                          "REPARATION DATE & TIME",
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold),
                         ),
@@ -201,7 +150,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                               text: TextSpan(
                                   style: Theme.of(context).textTheme.bodyText2,
                                   text:
-                                      "Time offered for the installation service is from 9.00 A.M to 7.00 P.M every weekday which are from Monday to Friday. Please allow 1 day for preparation after placing order.\nPlease note that we may contact you for any adjustment of date and time.")),
+                                      "Time offered for the reparation service is from 9.00 A.M to 7.00 P.M every weekday which are from Monday to Friday. Please allow 1 day for preparation after making a booking.\nPlease note that we may contact you for any adjustment of date and time.")),
                         ),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
@@ -281,7 +230,9 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                     alignment: Alignment.center,
                                     decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(5),
-                                        border: Border.all(color: Colors.grey)),
+                                        border: Border.all(color: Colors.grey)
+                                        //color: Colors.grey[200]
+                                        ),
                                     child: TextFormField(
                                       style: TextStyle(fontSize: 14),
                                       //textAlign: TextAlign.center,
@@ -323,7 +274,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                     child: Column(
                       children: [
                         Text(
-                          "DELIVERY & INSTALLAION ADDRESS",
+                          "REPARATION ADDRESS",
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold),
                         ),
@@ -412,137 +363,10 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                   color: Colors.grey,
                   height: 2,
                 ),
-                Container(
-                  margin: EdgeInsets.all(2),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 5, 20, 5),
-                    child: Column(
-                      children: [
-                        Column(
-                          children: [
-                            Text(
-                              "PAYMENT METHOD",
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text("Cash"),
-                                new Radio(
-                                  value: 0,
-                                  groupValue: _radioValue,
-                                  onChanged: (int value) {
-                                    _handleRadioValueChange1(value);
-                                  },
-                                ),
-                                Text("Online"),
-                                new Radio(
-                                  value: 1,
-                                  groupValue: _radioValue,
-                                  onChanged: (int value) {
-                                    if( _payOption == "Deposit"){
-                                      payAmount= widget.total* 0.1;
-                                    }else{
-                                      payAmount= widget.total;
-                                    }
-
-                                    _handleRadioValueChange1(value);
-                                  },
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        Divider(
-                          color: Colors.grey,
-                          height: 2,
-                        ),
-                        Visibility(
-                          visible: _statusCash,
-                          child: Container(
-                            height: 90,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                    "The payment will be made  by cash after the installation.\nInstallation fees included in the cost."),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Visibility(
-                          visible: _statusOnline,
-                          child: Container(
-                            height: 90,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                      "The deposit payment will be 10% of the total cost.\nInstallation fees included in the cost."),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text("Deposit"),
-                                      new Radio(
-                                        value: 2,
-                                        groupValue: _optionValue,
-                                        onChanged: (int value) {
-                                          _payOption = "Deposit";
-                                          payAmount= widget.total* 0.1;
-                                          _handleRadioValueChange2(value);
-                                        },
-                                      ),
-                                      Text("Full Payment"),
-                                      new Radio(
-                                        value: 3,
-                                        groupValue: _optionValue,
-                                        onChanged: (int value) {
-                                          _payOption = "Full Payment";
-                                          payAmount= widget.total;
-                                          _handleRadioValueChange2(value);
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Divider(
-                  color: Colors.grey,
-                  height: 2,
-                ),
                 SizedBox(height: 10),
                 Container(
                     child: Column(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 5, 0, 20),
-                      child: Text(
-                        "TOTAL AMOUNT PAYABLE : RM " +
-                            widget.total.toStringAsFixed(2),
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    Visibility(
-                      visible: _statusOnline,
-                                          child: Text(
-                        "RM " + payAmount.toStringAsFixed(2),
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red),
-                      ),
-                    ),
                     Container(
                       width: screenWidth / 2.5,
                       child: MaterialButton(
@@ -551,65 +375,24 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                         color: Theme.of(context).accentColor,
                         elevation: 3,
                         onPressed: () {
-                          _orderDialog();
-                          
+                          makeBooking();
                         },
-                        child: Text(buttonText,
+                        child: Text("Book Now",
                             style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.white,
-                                fontFamily: "Hind")),
+                                fontSize: 15,
+                                fontFamily: "Hind",
+                                color: Colors.white)),
                       ),
-                    ),
-                    SizedBox(height: 10),
+                    )
                   ],
-                ))
+                )),
+                SizedBox(height: 10),
               ],
             ),
           )
         ],
       ),
     );
-  }
-
-  void _handleRadioValueChange1(int value) {
-    setState(() {
-      _radioValue = value;
-      switch (_radioValue) {
-        case 0:
-          _payMethod = "Cash";
-          _payOption = "NA";
-          payAmount = 0;
-          buttonText = "ORDER NOW";
-          _statusOnline = false;
-          _statusCash = true;
-          break;
-        case 1:
-          _payMethod = "Online";
-          buttonText = "PAY NOW";
-          _statusOnline = true;
-          _statusCash = false;
-          break;
-      }
-    });
-  }
-
-  void _handleRadioValueChange2(int value)  {
-    //double totalPayable;
-    setState(() {
-      _optionValue = value;
-      switch (_radioValue) {
-        case 2:
-          _payOption = "Deposit";
-          payAmount = widget.total * 0.1;
-          break;
-        case 3:
-          _payOption = "Full Payment";
-          payAmount = widget.total;
-          break;
-      }
-      print(payAmount);
-    });
   }
 
   void phoneDialog() {
@@ -658,11 +441,51 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
         });
   }
 
-  Future<void> _loadPref() async {
-    prefs = await SharedPreferences.getInstance();
-    _name = prefs.getString("name") ?? 'Click to set';
-    _phone = prefs.getString("phone") ?? 'Click to set';
-    setState(() {});
+  Future<Null> _selectDate(BuildContext context) async {
+    final DateTime picked = await showDatePicker(
+        context: context,
+        initialDate: DateTime.now().add(Duration(days: 1)),
+        initialDatePickerMode: DatePickerMode.day,
+        firstDate: DateTime.now().add(Duration(days: 1)),
+        lastDate: DateTime(2025));
+    if (picked != null)
+      setState(() {
+        selectedDate = picked;
+        _dateController.text = DateFormat('dd/MM/yyyy').format(selectedDate);
+      });
+  }
+
+  Future<Null> _selectTimes(BuildContext context) async {
+    final TimeOfDay picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: 9, minute: 0),
+    );
+
+    if (picked != null) {
+      if (picked.hour > 19 ||
+          picked.hour == 19 && picked.minute > 0 ||
+          picked.hour < 9) {
+        Fluttertoast.showToast(
+            msg: "Invalid time selection",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.redAccent[700],
+            textColor: Colors.white,
+            fontSize: 16.0);
+        return;
+      }
+      setState(() {
+        selectedTime = picked;
+        _hour = selectedTime.hour.toString();
+        _minute = selectedTime.minute.toString();
+        _time = _hour + ' : ' + _minute;
+        _timeController.text = _time;
+        _timeController.text = formatDate(
+            DateTime(2019, 08, 1, selectedTime.hour, selectedTime.minute),
+            [hh, ':', nn, " ", am]).toString();
+      });
+    }
   }
 
   _getUserCurrentLoc() async {
@@ -726,54 +549,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
     return await Geolocator.getCurrentPosition();
   }
 
-  Future<Null> _selectDate(BuildContext context) async {
-    final DateTime picked = await showDatePicker(
-        context: context,
-        initialDate: DateTime.now().add(Duration(days: 1)),
-        initialDatePickerMode: DatePickerMode.day,
-        firstDate: DateTime.now().add(Duration(days: 1)),
-        lastDate: DateTime(2025));
-    if (picked != null)
-      setState(() {
-        selectedDate = picked;
-        _dateController.text = DateFormat('dd/MM/yyyy').format(selectedDate);
-      });
-  }
-
-  Future<Null> _selectTimes(BuildContext context) async {
-    final TimeOfDay picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay(hour: 9, minute: 0),
-    );
-
-    if (picked != null) {
-      if (picked.hour > 19 ||
-          picked.hour == 19 && picked.minute > 0 ||
-          picked.hour < 9) {
-        Fluttertoast.showToast(
-            msg: "Invalid time selection",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.redAccent[700],
-            textColor: Colors.white,
-            fontSize: 16.0);
-        return;
-      }
-      setState(() {
-        selectedTime = picked;
-        _hour = selectedTime.hour.toString();
-        _minute = selectedTime.minute.toString();
-        _time = _hour + ' : ' + _minute;
-        _timeController.text = _time;
-        _timeController.text = formatDate(
-            DateTime(2019, 08, 1, selectedTime.hour, selectedTime.minute),
-            [hh, ':', nn, " ", am]).toString();
-      });
-    }
-  }
-
-  void _orderDialog() {
+  void makeBooking() {
     if (_phone == "Click to set" ||
         _userlocctrl.text == "" ||
         _dateController.text ==
@@ -788,84 +564,81 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
           fontSize: 16.0);
       return;
     }
-    if(buttonText=="ORDER NOW"){
-      showDialog(
-        builder: (context) => new AlertDialog(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                title: new Text(
-                  "Make order with total amount payable of RM"+ widget.total.toStringAsFixed(2) + "?",
-                  style: TextStyle(
-                    color: Colors.black,
-                  ),
-                ),
-                actions: <Widget>[
-                  TextButton(
-                    child: Text("Yes"),
-                    onPressed: () async {
-                      Navigator.of(context).pop();
-                      Order _order = new Order(
-                           phone:_phone, 
-                           date:_dateController.text,
-                           time: _timeController.text, 
-                           address:_userlocctrl.text.replaceAll("\n", ""), 
-                           payMethod:_payMethod, 
-                           payOption:_payOption, 
-                           payAmount:payAmount.toStringAsFixed(2), 
-                           totalPayable:widget.total.toStringAsFixed(2));
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => MainScreen(user: widget.user),
-                        ),
-                      );
-                    },
-                  ),
-                  TextButton(
-                      child: Text("No"),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      }),
-                ]),
-        context: context);
-    }else{
     showDialog(
-        builder: (context) => new AlertDialog(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                title: new Text(
-                  'Pay RM ' + payAmount.toStringAsFixed(2) + "?",
-                  style: TextStyle(
-                    color: Colors.black,
-                  ),
-                ),
-                actions: <Widget>[
-                  TextButton(
-                    child: Text("Yes"),
-                    onPressed: () async {
-                      Navigator.of(context).pop();
-                      Order _order = new Order(
-                           phone:_phone, 
-                           date:_dateController.text,
-                           time: _timeController.text, 
-                           address:_userlocctrl.text.replaceAll("\n", ""), 
-                           payMethod:_payMethod, 
-                           payOption:_payOption, 
-                           payAmount:payAmount.toStringAsFixed(2), 
-                           totalPayable:widget.total.toStringAsFixed(2));
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => PayScreen(user: widget.user, order: _order),
-                        ),
-                      );
-                    },
-                  ),
-                  TextButton(
-                      child: Text("No"),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      }),
-                ]),
-        context: context);
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20.0))),
+            title: Text("Make New Reparation Booking?"),
+            content: Text("Are your sure?"),
+            actions: [
+              TextButton(
+                child: Text("Ok",
+                 style: TextStyle(color: Theme.of(context).accentColor),),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  bookReparation();
+                },
+              ),
+              TextButton(
+                  child: Text("Cancel",
+                   style: TextStyle(color: Theme.of(context).accentColor),),
+                  
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    
+                  }),
+            ],
+          );
+        });
   }
+
+    Future<void> bookReparation() async {
+   
+    String email = widget.user.email;
+    String name = widget.user.username;
+    String phone = phoneController.text;
+    String date = _dateController.text;
+    String time = _timeController.text;
+    String address = _userlocctrl.text.replaceAll("\n", "");
+    
+    
+    http.post(
+        Uri.parse("https://crimsonwebs.com/s272033/winfunggate/php/addrepairbookings.php"),
+        body: {
+          "email": email,
+          "name": name,
+          "phone": phone,
+          "date": date,
+          "time": time,
+          "address": address
+        }).then((response) {
+ 
+      if (response.body == "success") {
+        Fluttertoast.showToast(
+            msg: "Booking Success",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Theme.of(context).accentColor,
+            textColor: Colors.white,
+            fontSize: 16.0);
+        setState(() {
+         
+        });
+        
+      } else {
+        Fluttertoast.showToast(
+            msg: "Booking Failed",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Theme.of(context).accentColor,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
+    });
+    
   }
 }
