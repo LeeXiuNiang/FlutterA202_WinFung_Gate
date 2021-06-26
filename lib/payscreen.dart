@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:winfung_gate/mainscreen.dart';
 import 'package:winfung_gate/order.dart';
 import 'package:winfung_gate/user.dart';
 
@@ -23,6 +24,14 @@ class _PayScreenState extends State<PayScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Payment'),
+        leading: new IconButton(
+          icon: new Icon(Icons.arrow_back),
+          onPressed: (){Navigator.pop(context);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (content) =>
+                          MainScreen(user: widget.user)));}),
       ),
       body: Center(
         child: Container(
@@ -38,7 +47,9 @@ class _PayScreenState extends State<PayScreen> {
                           '&name=' +
                           widget.user.username +
                           '&amount=' +
-                          widget.order.payAmount,
+                          widget.order.payAmount +
+                          '&total=' +
+                          widget.order.totalPayable,
                   javascriptMode: JavascriptMode.unrestricted,
                   onWebViewCreated: (WebViewController webViewController) {
                     _controller.complete(webViewController);

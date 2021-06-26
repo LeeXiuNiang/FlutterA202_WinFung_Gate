@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:winfung_gate/loginscreen.dart';
 import 'package:winfung_gate/mainscreen.dart';
+import 'package:winfung_gate/profilescreen.dart';
 
 import 'bookingscreen.dart';
 import 'messaging.dart';
@@ -80,6 +81,12 @@ class _MyDrawerState extends State<MyDrawer> {
             trailing: Icon(Icons.arrow_forward),
             onTap: () {
               Navigator.pop(context);
+              Navigator.pop(context);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (content) =>
+                          ProfileScreen(user: widget.user)));
             }),
         Divider(
           color: Colors.black87,

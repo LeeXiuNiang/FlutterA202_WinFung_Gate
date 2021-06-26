@@ -8,6 +8,7 @@ import 'package:ndialog/ndialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:winfung_gate/order.dart';
 import 'package:winfung_gate/payscreen.dart';
+import 'package:http/http.dart' as http;
 
 import 'delivery.dart';
 import 'mainscreen.dart';
@@ -19,7 +20,7 @@ class CheckOutScreen extends StatefulWidget {
   final User user;
 
   const CheckOutScreen({Key key, this.user, this.total}) : super(key: key);
-  
+
   @override
   _CheckOutScreenState createState() => _CheckOutScreenState();
 }
@@ -48,7 +49,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
   bool _statusOnline = false;
   String _payMethod = "Cash";
   String _payOption = "Deposit";
-  double totalPayable, payAmount=0;
+  double totalPayable, payAmount = 0;
   String buttonText = "ORDER NOW";
 
   @override
@@ -441,10 +442,10 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                   value: 1,
                                   groupValue: _radioValue,
                                   onChanged: (int value) {
-                                    if( _payOption == "Deposit"){
-                                      payAmount= widget.total* 0.1;
-                                    }else{
-                                      payAmount= widget.total;
+                                    if (_payOption == "Deposit") {
+                                      payAmount = widget.total * 0.1;
+                                    } else {
+                                      payAmount = widget.total;
                                     }
 
                                     _handleRadioValueChange1(value);
@@ -491,7 +492,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                         groupValue: _optionValue,
                                         onChanged: (int value) {
                                           _payOption = "Deposit";
-                                          payAmount= widget.total* 0.1;
+                                          payAmount = widget.total * 0.1;
                                           _handleRadioValueChange2(value);
                                         },
                                       ),
@@ -501,7 +502,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                                         groupValue: _optionValue,
                                         onChanged: (int value) {
                                           _payOption = "Full Payment";
-                                          payAmount= widget.total;
+                                          payAmount = widget.total;
                                           _handleRadioValueChange2(value);
                                         },
                                       ),
@@ -535,7 +536,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                     ),
                     Visibility(
                       visible: _statusOnline,
-                                          child: Text(
+                      child: Text(
                         "RM " + payAmount.toStringAsFixed(2),
                         style: TextStyle(
                             fontSize: 16,
@@ -552,7 +553,6 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                         elevation: 3,
                         onPressed: () {
                           _orderDialog();
-                          
                         },
                         child: Text(buttonText,
                             style: TextStyle(
@@ -594,7 +594,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
     });
   }
 
-  void _handleRadioValueChange2(int value)  {
+  void _handleRadioValueChange2(int value) {
     //double totalPayable;
     setState(() {
       _optionValue = value;
@@ -788,92 +788,130 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
           fontSize: 16.0);
       return;
     }
-    if(buttonText=="ORDER NOW"){
+    if (buttonText == "ORDER NOW") {
       showDialog(
-        builder: (context) => new AlertDialog(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                title: new Text(
-                  "Place order with total amount payable of RM"+ widget.total.toStringAsFixed(2) + "?",
-                  style: TextStyle(
-                    color: Colors.black,
+          builder: (context) => new AlertDialog(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                  title: new Text(
+                    "Place order with total amount payable of RM" +
+                        widget.total.toStringAsFixed(2) +
+                        "?",
+                    style: TextStyle(
+                      color: Colors.black,
+                    ),
                   ),
-                ),
-                actions: <Widget>[
-                  TextButton(
-                    child: Text("Yes",
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text("Yes",
                           style:
                               TextStyle(color: Theme.of(context).accentColor)),
-                    onPressed: () async {
-                      Navigator.of(context).pop();
-                      Order _order = new Order(
-                           phone:_phone, 
-                           date:_dateController.text,
-                           time: _timeController.text, 
-                           address:_userlocctrl.text.replaceAll("\n", ""), 
-                           payMethod:_payMethod, 
-                           payOption:_payOption, 
-                           payAmount:payAmount.toStringAsFixed(2), 
-                           totalPayable:widget.total.toStringAsFixed(2));
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => MainScreen(user: widget.user),
-                        ),
-                      );
-                    },
-                  ),
-                  TextButton(
-                      child: Text("No",
-                          style:
-                              TextStyle(color: Theme.of(context).accentColor)),
-                      onPressed: () {
+                      onPressed: () async {
                         Navigator.of(context).pop();
-                      }),
-                ]),
-        context: context);
-    }else{
-    showDialog(
-        builder: (context) => new AlertDialog(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                title: new Text(
-                  'Pay RM ' + payAmount.toStringAsFixed(2) + "?",
-                  style: TextStyle(
-                    color: Colors.black,
+                        Order _order = new Order(
+                            phone: _phone,
+                            date: _dateController.text,
+                            time: _timeController.text,
+                            address: _userlocctrl.text.replaceAll("\n", ""),
+                            payMethod: _payMethod,
+                            payOption: _payOption,
+                            payAmount: payAmount.toStringAsFixed(2),
+                            totalPayable: widget.total.toStringAsFixed(2));
+                            placeOrder();
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => MainScreen(user: widget.user),
+                          ),
+                        );
+                      },
+                    ),
+                    TextButton(
+                        child: Text("No",
+                            style: TextStyle(
+                                color: Theme.of(context).accentColor)),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        }),
+                  ]),
+          context: context);
+    } else {
+      showDialog(
+          builder: (context) => new AlertDialog(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                  title: new Text(
+                    'Pay RM ' + payAmount.toStringAsFixed(2) + "?",
+                    style: TextStyle(
+                      color: Colors.black,
+                    ),
                   ),
-                ),
-                actions: <Widget>[
-                  TextButton(
-                    child: Text("Yes",
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text("Yes",
                           style:
                               TextStyle(color: Theme.of(context).accentColor)),
-                    onPressed: () async {
-                      Navigator.of(context).pop();
-                      Order _order = new Order(
-                           phone:_phone, 
-                           date:_dateController.text,
-                           time: _timeController.text, 
-                           address:_userlocctrl.text.replaceAll("\n", ""), 
-                           payMethod:_payMethod, 
-                           payOption:_payOption, 
-                           payAmount:payAmount.toStringAsFixed(2), 
-                           totalPayable:widget.total.toStringAsFixed(2));
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => PayScreen(user: widget.user, order: _order),
-                        ),
-                      );
-                    },
-                  ),
-                  TextButton(
-                      child: Text("No",
-                          style:
-                              TextStyle(color: Theme.of(context).accentColor)),
-                      onPressed: () {
+                      onPressed: () async {
                         Navigator.of(context).pop();
-                      }),
-                ]),
-        context: context);
+                        Order _order = new Order(
+                            phone: _phone,
+                            date: _dateController.text,
+                            time: _timeController.text,
+                            address: _userlocctrl.text.replaceAll("\n", ""),
+                            payMethod: _payMethod,
+                            payOption: _payOption,
+                            payAmount: payAmount.toStringAsFixed(2),
+                            totalPayable: widget.total.toStringAsFixed(2));
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                PayScreen(user: widget.user, order: _order),
+                          ),
+                        );
+                      },
+                    ),
+                    TextButton(
+                        child: Text("No",
+                            style: TextStyle(
+                                color: Theme.of(context).accentColor)),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        }),
+                  ]),
+          context: context);
+    }
   }
+
+  Future<void> placeOrder() async {
+    String email = widget.user.email;
+    String total = widget.total.toStringAsFixed(2);
+
+    http.post(
+        Uri.parse(
+            "https://crimsonwebs.com/s272033/winfunggate/php/addorders.php"),
+        body: {
+          "email": email,
+          "total": total,
+        }).then((response) {
+      if (response.body == "success") {
+        Fluttertoast.showToast(
+            msg: "Order Success",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Theme.of(context).accentColor,
+            textColor: Colors.white,
+            fontSize: 16.0);
+        setState(() {});
+      } else {
+        Fluttertoast.showToast(
+            msg: "Order Failed",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Theme.of(context).accentColor,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
+    });
   }
 }
