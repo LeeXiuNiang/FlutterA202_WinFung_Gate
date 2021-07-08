@@ -29,6 +29,7 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _testasync();
+    _loadCart();
   }
 
   @override

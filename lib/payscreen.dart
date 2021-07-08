@@ -49,7 +49,11 @@ class _PayScreenState extends State<PayScreen> {
                           '&amount=' +
                           widget.order.payAmount +
                           '&total=' +
-                          widget.order.totalPayable,
+                          widget.order.totalPayable + 
+                          '&date=' +
+                          widget.order.date +
+                          '&time=' +
+                          widget.order.time,
                   javascriptMode: JavascriptMode.unrestricted,
                   onWebViewCreated: (WebViewController webViewController) {
                     _controller.complete(webViewController);

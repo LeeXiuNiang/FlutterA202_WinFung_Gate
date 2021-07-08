@@ -5,6 +5,7 @@ import 'package:winfung_gate/profilescreen.dart';
 
 import 'bookingscreen.dart';
 import 'messaging.dart';
+import 'mypurchase.dart';
 import 'user.dart';
 
 class MyDrawer extends StatefulWidget {
@@ -59,6 +60,19 @@ class _MyDrawerState extends State<MyDrawer> {
                   context,
                   MaterialPageRoute(
                       builder: (content) => BookingScreen(user: widget.user)));
+            }),
+            ListTile(
+            title: Text("Purchase History"),
+            leading: Icon(Icons.history,
+                color: Theme.of(context).accentColor),
+            trailing: Icon(Icons.arrow_forward),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pop(context);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (content) => MyPurchase(user: widget.user)));
             }),
         ListTile(
             title: Text("Contact Us"),

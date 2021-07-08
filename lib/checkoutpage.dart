@@ -884,6 +884,8 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
   Future<void> placeOrder() async {
     String email = widget.user.email;
     String total = widget.total.toStringAsFixed(2);
+    String date = _dateController.text;
+    String time = _timeController.text;
 
     http.post(
         Uri.parse(
@@ -891,6 +893,8 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
         body: {
           "email": email,
           "total": total,
+          "date" : date,
+          "time" : time,
         }).then((response) {
       if (response.body == "success") {
         Fluttertoast.showToast(

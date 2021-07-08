@@ -1,39 +1,31 @@
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:winfung_gate/mydrawer.dart';
 import 'package:winfung_gate/user.dart';
 import 'package:http/http.dart' as http;
-
-class MyBooking extends StatefulWidget {
+ 
+ 
+class MyPurchase extends StatefulWidget {
   final User user;
 
-  const MyBooking({Key key, this.user}) : super(key: key);
+  const MyPurchase({Key key, this.user}) : super(key: key);
 
   @override
-  _MyBookingState createState() => _MyBookingState();
+  _MyPurchaseState createState() => _MyPurchaseState();
 }
 
-class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
-  List _bookingList;
+class _MyPurchaseState extends State<MyPurchase> {
+  List _purchaseList;
   String titleCenter = "Loading...";
   double screenHeight, screenWidth;
-  bool _statusPending = true;
   
-
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     _testasync();
-    print("Init tab 1");
-  }
-
-  @override
-  void dispose() {
-    print("in dispose");
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
   }
 
   @override
@@ -42,10 +34,14 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
     screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      body: Center(
+        appBar: AppBar(
+          title: Text('Purchase History'),
+        ),
+        drawer: MyDrawer(user: widget.user), 
+        body: Center(
         child: Column(
           children: [
-            if (_bookingList == null)
+            if (_purchaseList == null)
               Flexible(child: Center(child: Text(titleCenter)))
             else
               Flexible(
@@ -53,7 +49,7 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
                 return GridView.count(
                     crossAxisCount: 1,
                     childAspectRatio: 2.5/ 1,
-                    children: List.generate(_bookingList.length, (index) {
+                    children: List.generate(_purchaseList.length, (index) {
                       return Padding(
                           padding: const EdgeInsets.fromLTRB(10, 6, 10, 0),
                           child: Container(
@@ -72,46 +68,169 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
                                       child: Row(
                                         children: [
                                           Expanded(
-                                            flex: 9,
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Padding(
+                                              flex: 4,
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.fromLTRB(
+                                                        7, 0, 0, 0),
+                                                height: orientation ==
+                                                        Orientation.portrait
+                                                    ? 130
+                                                    : 200,
+                                                width: orientation ==
+                                                        Orientation.portrait
+                                                    ? 130
+                                                    : 200,
+                                                child: CachedNetworkImage(
+                                                  imageUrl:
+                                                      "https://crimsonwebs.com/s272033/winfunggate/images/products/${_purchaseList[index]['prid']}.png",
+                                                ),
+                                              ),
+                                            ),
+                                            Container(
+                                                height: 100,
+                                                child: VerticalDivider(
+                                                    color: Colors.indigo[500])),
+                                                    Expanded(
+                                              flex: 6,
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                        _purchaseList[index]
+                                                            ['prname'],
+                                                            overflow: TextOverflow
+                                                              .ellipsis,
+                                                        style: TextStyle(
+                                                            fontSize: 19,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold,
+                                                                    )),
+                                                    Padding(
                                                     padding: const EdgeInsets
-                                                        .fromLTRB(5, 5, 5, 5),
+                                                        .fromLTRB(0, 5, 0, 2),
                                                     child: Row(
                                                       mainAxisAlignment:
                                                           MainAxisAlignment
                                                               .center,
                                                       children: [
                                                         Expanded(
-                                                            flex: 3,
+                                                            flex: 7,
                                                             child: Text(
-                                                                "Date",
+                                                                "Quantity",
                                                                 style:
                                                                     TextStyle(
                                                                   fontSize: 16,
                                                                 ))),
+                                                        
                                                         Expanded(
-                                                            flex: 1,
-                                                            child: Text(
-                                                                ":",
-                                                                style:
-                                                                    TextStyle(
-                                                                  fontSize: 16,
-                                                                ))),
-                                                        Expanded(
-                                                          flex: 7,
+                                                          flex: 10,
                                                           child: Text(
-                                                             _bookingList[
+                                                            " : " +
+                                                             _purchaseList[
                                                                       index]
-                                                                  ['date'],
+                                                                  ['qty'],
+                                                              style: TextStyle(
+                                                                fontSize: 16,
+                                                              )),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                    Padding(
+                                                    padding: const EdgeInsets
+                                                        .fromLTRB(0, 0, 0, 2),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Expanded(
+                                                            flex: 7,
+                                                            child: Text(
+                                                                "OrderID",
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize: 16,
+                                                                ))),
+                                                        
+                                                        Expanded(
+                                                          flex: 10,
+                                                          child: Text(
+                                                            " : " +
+                                                             _purchaseList[
+                                                                      index]
+                                                                  ['orderid'],
+                                                              style: TextStyle(
+                                                                fontSize: 16,
+                                                              )),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                     
+                                                    Padding(
+                                                    padding: const EdgeInsets
+                                                        .fromLTRB(0, 0, 0, 2),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Expanded(
+                                                            flex: 7,
+                                                            child: Text(
+                                                                "Instl. Time",
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize: 16,
+                                                                ))),
+                                                        
+                                                        Expanded(
+                                                          flex: 10,
+                                                          child: Text(
+                                                            " : " +
+                                                             _purchaseList[
+                                                                      index]
+                                                                  ['instime'],
+                                                              style: TextStyle(
+                                                                fontSize: 16,
+                                                              )),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                     Padding(
+                                                    padding: const EdgeInsets
+                                                        .fromLTRB(0, 0, 0, 2),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Expanded(
+                                                            flex: 7,
+                                                            child: Text(
+                                                                "Instl. Date",
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize: 16,
+                                                                ))),
+                                                        
+                                                        Expanded(
+                                                          flex: 10,
+                                                          child: Text(
+                                                            " : " +
+                                                             _purchaseList[
+                                                                      index]
+                                                                  ['insdate'],
                                                               style: TextStyle(
                                                                 fontSize: 16,
                                                               )),
@@ -121,106 +240,26 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
                                                   ),
                                                   Padding(
                                                     padding: const EdgeInsets
-                                                        .fromLTRB(5, 5, 5, 5),
+                                                        .fromLTRB(0, 0, 0, 2),
                                                     child: Row(
                                                       mainAxisAlignment:
                                                           MainAxisAlignment
                                                               .center,
                                                       children: [
                                                         Expanded(
-                                                            flex: 3,
-                                                            child: Text(
-                                                                "Time",
-                                                                style:
-                                                                    TextStyle(
-                                                                  fontSize: 16,
-                                                                ))),
-                                                        Expanded(
-                                                            flex: 1,
-                                                            child: Text(
-                                                                ":",
-                                                                style:
-                                                                    TextStyle(
-                                                                  fontSize: 16,
-                                                                ))),
-                                                        Expanded(
-                                                          flex: 7,
-                                                          child: Text(
-                                                              _bookingList[
-                                                                      index]
-                                                                  ['time'],
-                                                              style: TextStyle(
-                                                                fontSize: 16,
-                                                              )),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  Padding(
-                                                    padding: const EdgeInsets
-                                                        .fromLTRB(5, 5, 5, 5),
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Expanded(
-                                                            flex: 3,
-                                                            child: Text(
-                                                                "Address",
-                                                                style:
-                                                                    TextStyle(
-                                                                  fontSize: 16,
-                                                                ))),
-                                                        Expanded(
-                                                            flex: 1,
-                                                            child: Text(
-                                                                ":",
-                                                                style:
-                                                                    TextStyle(
-                                                                  fontSize: 16,
-                                                                ))),
-                                                        Expanded(
-                                                          flex: 7,
-                                                          child: Text(
-                                                              _bookingList[
-                                                                      index]
-                                                                  ['address'].replaceAll(",", ", "),
-                                                              style: TextStyle(
-                                                                fontSize: 16,
-                                                              )),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  Padding(
-                                                    padding: const EdgeInsets
-                                                        .fromLTRB(5, 5, 5, 5),
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Expanded(
-                                                            flex: 3,
+                                                            flex: 7,
                                                             child: Text(
                                                                 "Status",
                                                                 style:
                                                                     TextStyle(
                                                                   fontSize: 16,
                                                                 ))),
+                                                        
                                                         Expanded(
-                                                            flex: 1,
-                                                            child: Text(
-                                                                ":",
-                                                                style:
-                                                                    TextStyle(
-                                                                  fontSize: 16,
-                                                                ))),
-                                                        Expanded(
-                                                          flex: 7,
+                                                          flex: 10,
                                                           child: Text(
-                                                             _bookingList[
+                                                            " : " +
+                                                             _purchaseList[
                                                                       index]
                                                                   ['status'],
                                                               style: TextStyle(
@@ -230,10 +269,14 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
                                                       ],
                                                     ),
                                                   ),
-                                                ],
+                                                    
+                                                    
+                                                  ],
+                                                ),
                                               ),
                                             ),
-                                          ),
+                                            
+                                          
                                          Expanded(
                                               flex: 1,
                                               child: Column(
@@ -255,33 +298,33 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
           ],
         ),
       ),
+      
     );
   }
-
   Future<void> _testasync() async {
-    _loadBookings();
+    _loadPurchaseHistory();
   }
 
-  void _loadBookings() {
+  void _loadPurchaseHistory() {
     http.post(
         Uri.parse(
-            "https://crimsonwebs.com/s272033/winfunggate/php/loadbookings.php"),
+            "https://crimsonwebs.com/s272033/winfunggate/php/loadpurchased.php"),
         body: {"email": widget.user.email}).then((response) {
       if (response.body == "nodata") {
-        titleCenter = "No Bookings";
+        titleCenter = "No Purchase History";
         return;
       } else {
         var jsondata = json.decode(response.body);
-        _bookingList = jsondata["bookings"];
-        titleCenter = "Loading Bookings";
+        _purchaseList = jsondata["purchased"];
+        titleCenter = "Loading Pruchase History";
         setState(() {});
-        print(_bookingList);
+        print(_purchaseList);
       }
     });
   }
-  
+
   void _updateSatutusDialog(int index) {
-    if( _bookingList[index]['status']=="completed"){
+    if( _purchaseList[index]['status']=="completed"){
       Fluttertoast.showToast(
             msg: "Status Updated Failed due to completion of bookings",
             toastLength: Toast.LENGTH_SHORT,
@@ -297,7 +340,7 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0))),
                 title: new Text(
-                  'Update status of booking service to completed?',
+                  'Update status of installation service to completed?',
                   style: TextStyle(),
                 ),
                 content: new Text(
@@ -310,7 +353,7 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
                         style: TextStyle(color: Theme.of(context).accentColor)),
                     onPressed: () {
                       Navigator.of(context).pop();
-                      _updateBookings(index);
+                      _updatePurchased(index);
                       
                     },
                   ),
@@ -326,14 +369,15 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
     }
   }
 
-  void _updateBookings(int index) {
+  void _updatePurchased(int index) {
     http.post(
         Uri.parse(
-            "https://crimsonwebs.com/s272033/winfunggate/php/updatebookings.php"),
+            "https://crimsonwebs.com/s272033/winfunggate/php/updatepurchased.php"),
         body: {
           "email": widget.user.email,
-          "rbid": _bookingList[index]['id'],
-          "status": _bookingList[index]['status']
+          "prid": _purchaseList[index]['prid'],
+          "orderid": _purchaseList[index]['orderid'],
+          "status": _purchaseList[index]['status']
         }).then((response) {
       print(response.body);
       if (response.body == "success") {
@@ -345,7 +389,7 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
             backgroundColor: Theme.of(context).accentColor,
             textColor: Colors.white,
             fontSize: 16.0);
-        _loadBookings();
+        _loadPurchaseHistory();
       } else {
         Fluttertoast.showToast(
             msg: "Status Updated Failed",
@@ -358,5 +402,4 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
       }
     });
   }
-
 }
