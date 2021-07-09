@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:winfung_gate/mydrawer.dart';
 import 'package:winfung_gate/user.dart';
 import 'package:http/http.dart' as http;
 
@@ -19,7 +20,7 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
   String titleCenter = "Loading...";
   double screenHeight, screenWidth;
   bool _statusPending = true;
-  
+  bool _isAdmin = false;
 
   @override
   void initState() {
@@ -42,6 +43,12 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
     screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      appBar: _isAdmin
+          ? AppBar(
+              title: Text("All Reparation Bookings"),
+            )
+          : null,
+      drawer: Visibility(visible: _isAdmin, child: MyDrawer(user: widget.user)),
       body: Center(
         child: Column(
           children: [
@@ -52,7 +59,7 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
                   child: OrientationBuilder(builder: (context, orientation) {
                 return GridView.count(
                     crossAxisCount: 1,
-                    childAspectRatio: 2.5/ 1,
+                    childAspectRatio: _isAdmin ? 2.2 : 2.5 / 1,
                     children: List.generate(_bookingList.length, (index) {
                       return Padding(
                           padding: const EdgeInsets.fromLTRB(10, 6, 10, 0),
@@ -75,13 +82,56 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
                                             flex: 9,
                                             child: Padding(
                                               padding:
-                                                  const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                                                  const EdgeInsets.fromLTRB(
+                                                      5, 0, 0, 0),
                                               child: Column(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.center,
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: [
+                                                  Visibility(
+                                                    visible: _isAdmin,
+                                                    child: Padding(
+                                                      padding: const EdgeInsets
+                                                          .fromLTRB(5, 5, 5, 5),
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          Expanded(
+                                                              flex: 3,
+                                                              child: Text(
+                                                                  "Email",
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontSize:
+                                                                        16,
+                                                                  ))),
+                                                          Expanded(
+                                                              flex: 1,
+                                                              child: Text(":",
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontSize:
+                                                                        16,
+                                                                  ))),
+                                                          Expanded(
+                                                            flex: 7,
+                                                            child: Text(
+                                                                _bookingList[
+                                                                        index]
+                                                                    ['email'],
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize: 16,
+                                                                )),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
                                                   Padding(
                                                     padding: const EdgeInsets
                                                         .fromLTRB(5, 5, 5, 5),
@@ -92,16 +142,14 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
                                                       children: [
                                                         Expanded(
                                                             flex: 3,
-                                                            child: Text(
-                                                                "Date",
+                                                            child: Text("Date",
                                                                 style:
                                                                     TextStyle(
                                                                   fontSize: 16,
                                                                 ))),
                                                         Expanded(
                                                             flex: 1,
-                                                            child: Text(
-                                                                ":",
+                                                            child: Text(":",
                                                                 style:
                                                                     TextStyle(
                                                                   fontSize: 16,
@@ -109,7 +157,7 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
                                                         Expanded(
                                                           flex: 7,
                                                           child: Text(
-                                                             _bookingList[
+                                                              _bookingList[
                                                                       index]
                                                                   ['date'],
                                                               style: TextStyle(
@@ -129,16 +177,14 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
                                                       children: [
                                                         Expanded(
                                                             flex: 3,
-                                                            child: Text(
-                                                                "Time",
+                                                            child: Text("Time",
                                                                 style:
                                                                     TextStyle(
                                                                   fontSize: 16,
                                                                 ))),
                                                         Expanded(
                                                             flex: 1,
-                                                            child: Text(
-                                                                ":",
+                                                            child: Text(":",
                                                                 style:
                                                                     TextStyle(
                                                                   fontSize: 16,
@@ -174,8 +220,7 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
                                                                 ))),
                                                         Expanded(
                                                             flex: 1,
-                                                            child: Text(
-                                                                ":",
+                                                            child: Text(":",
                                                                 style:
                                                                     TextStyle(
                                                                   fontSize: 16,
@@ -184,8 +229,12 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
                                                           flex: 7,
                                                           child: Text(
                                                               _bookingList[
-                                                                      index]
-                                                                  ['address'].replaceAll(",", ", "),
+                                                                          index]
+                                                                      [
+                                                                      'address']
+                                                                  .replaceAll(
+                                                                      ",",
+                                                                      ", "),
                                                               style: TextStyle(
                                                                 fontSize: 16,
                                                               )),
@@ -211,8 +260,7 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
                                                                 ))),
                                                         Expanded(
                                                             flex: 1,
-                                                            child: Text(
-                                                                ":",
+                                                            child: Text(":",
                                                                 style:
                                                                     TextStyle(
                                                                   fontSize: 16,
@@ -220,7 +268,7 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
                                                         Expanded(
                                                           flex: 7,
                                                           child: Text(
-                                                             _bookingList[
+                                                              _bookingList[
                                                                       index]
                                                                   ['status'],
                                                               style: TextStyle(
@@ -234,20 +282,27 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
                                               ),
                                             ),
                                           ),
-                                         Expanded(
+                                          Visibility(
+                                            visible: _isAdmin,
+                                            child: Expanded(
                                               flex: 1,
                                               child: Column(
                                                 children: [
                                                   IconButton(
                                                     icon: Icon(
-                                                      Icons.event_available_sharp,
+                                                      Icons
+                                                          .event_available_sharp,
                                                       color: Colors.indigo[900],
                                                     ),
-                                                    onPressed: () {_updateSatutusDialog(index);},
+                                                    onPressed: () {
+                                                      _updateSatutusDialog(
+                                                          index);
+                                                    },
                                                   ),
                                                 ],
                                               ),
                                             ),
+                                          ),
                                         ],
                                       )))));
                     }));
@@ -260,6 +315,7 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
 
   Future<void> _testasync() async {
     _loadBookings();
+    checkAdmin();
   }
 
   void _loadBookings() {
@@ -279,50 +335,50 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
       }
     });
   }
-  
+
   void _updateSatutusDialog(int index) {
-    if( _bookingList[index]['status']=="completed"){
+    if (_bookingList[index]['status'] == "completed") {
       Fluttertoast.showToast(
-            msg: "Status Updated Failed due to completion of bookings",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.redAccent[700],
-            textColor: Colors.white,
-            fontSize: 16.0);
-        return;
-      }else{
-    showDialog(
-        builder: (context) => new AlertDialog(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                title: new Text(
-                  'Update status of booking service to completed?',
-                  style: TextStyle(),
-                ),
-                content: new Text(
-                  'Are your sure?',
-                  style: TextStyle(),
-                ),
-                actions: <Widget>[
-                  TextButton(
-                    child: Text("Yes",
-                        style: TextStyle(color: Theme.of(context).accentColor)),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      _updateBookings(index);
-                      
-                    },
+          msg: "Status Updated Failed due to completion of bookings",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.redAccent[700],
+          textColor: Colors.white,
+          fontSize: 16.0);
+      return;
+    } else {
+      showDialog(
+          builder: (context) => new AlertDialog(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                  title: new Text(
+                    'Update status of booking service to completed?',
+                    style: TextStyle(),
                   ),
-                  TextButton(
-                      child: Text("No",
+                  content: new Text(
+                    'Are your sure?',
+                    style: TextStyle(),
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text("Yes",
                           style:
                               TextStyle(color: Theme.of(context).accentColor)),
                       onPressed: () {
                         Navigator.of(context).pop();
-                      }),
-                ]),
-        context: context);
+                        _updateBookings(index);
+                      },
+                    ),
+                    TextButton(
+                        child: Text("No",
+                            style: TextStyle(
+                                color: Theme.of(context).accentColor)),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        }),
+                  ]),
+          context: context);
     }
   }
 
@@ -359,4 +415,11 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
     });
   }
 
+  void checkAdmin() {
+    setState(() {
+      if (widget.user.email == 'xnlee1999@gmail.com') {
+        _isAdmin = true;
+      }
+    });
+  }
 }

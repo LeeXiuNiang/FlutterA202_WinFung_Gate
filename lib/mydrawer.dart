@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:winfung_gate/loginscreen.dart';
 import 'package:winfung_gate/mainscreen.dart';
+import 'package:winfung_gate/mybooking.dart';
 import 'package:winfung_gate/profilescreen.dart';
 
 import 'bookingscreen.dart';
@@ -17,6 +18,14 @@ class MyDrawer extends StatefulWidget {
 }
 
 class _MyDrawerState extends State<MyDrawer> {
+  bool _isAdmin = false;
+
+  @override
+  void initState() {
+    super.initState();
+    checkAdmin();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -56,15 +65,24 @@ class _MyDrawerState extends State<MyDrawer> {
             onTap: () {
               Navigator.pop(context);
               Navigator.pop(context);
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (content) => BookingScreen(user: widget.user)));
+              if (_isAdmin == true) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (content) => MyBooking(user: widget.user)));
+              } else {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (content) =>
+                            BookingScreen(user: widget.user)));
+              }
             }),
-            ListTile(
-            title: Text("Purchase History"),
-            leading: Icon(Icons.history,
-                color: Theme.of(context).accentColor),
+        ListTile(
+            title: _isAdmin
+                ? Text("Customer Order History")
+                : Text("Purchase History"),
+            leading: Icon(Icons.history, color: Theme.of(context).accentColor),
             trailing: Icon(Icons.arrow_forward),
             onTap: () {
               Navigator.pop(context);
@@ -74,34 +92,40 @@ class _MyDrawerState extends State<MyDrawer> {
                   MaterialPageRoute(
                       builder: (content) => MyPurchase(user: widget.user)));
             }),
-        ListTile(
-            title: Text("Contact Us"),
-            leading: Icon(Icons.message_outlined,
-                color: Theme.of(context).accentColor),
-            trailing: Icon(Icons.arrow_forward),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (content) =>
-                          MessagingScreen(user: widget.user)));
-            }),
-        ListTile(
-            title: Text("My Profile"),
-            leading: Icon(Icons.person_outline_outlined,
-                color: Theme.of(context).accentColor),
-            trailing: Icon(Icons.arrow_forward),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (content) =>
-                          ProfileScreen(user: widget.user)));
-            }),
+        Visibility(
+          visible: !_isAdmin,
+          child: ListTile(
+              title: Text("Contact Us"),
+              leading: Icon(Icons.message_outlined,
+                  color: Theme.of(context).accentColor),
+              trailing: Icon(Icons.arrow_forward),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (content) =>
+                            MessagingScreen(user: widget.user)));
+              }),
+        ),
+        Visibility(
+          visible: !_isAdmin,
+          child: ListTile(
+              title: Text("My Profile"),
+              leading: Icon(Icons.person_outline_outlined,
+                  color: Theme.of(context).accentColor),
+              trailing: Icon(Icons.arrow_forward),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (content) =>
+                            ProfileScreen(user: widget.user)));
+              }),
+        ),
         Divider(
           color: Colors.black87,
         ),
@@ -154,5 +178,13 @@ class _MyDrawerState extends State<MyDrawer> {
                       }),
                 ]),
         context: context);
+  }
+
+  void checkAdmin() {
+    setState(() {
+      if (widget.user.email == 'xnlee1999@gmail.com') {
+        _isAdmin = true;
+      }
+    });
   }
 }

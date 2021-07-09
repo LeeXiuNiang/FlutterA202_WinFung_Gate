@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
+import 'package:winfung_gate/newproduct.dart';
 import 'cartpage.dart';
 import 'mydrawer.dart';
 import 'user.dart';
@@ -24,6 +25,7 @@ class _MainScreenState extends State<MainScreen> {
   final df = new DateFormat('dd-MM-yyyy');
   TextEditingController _srcController = new TextEditingController();
   int cartitem = 0;
+  bool _isAdmin = false;
 
   @override
   void initState() {
@@ -41,16 +43,19 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: Text("Discover our Products"),
         actions: [
-          TextButton.icon(
-              onPressed: () => {_goToCart()},
-              icon: Icon(
-                Icons.shopping_cart,
-                color: Colors.white,
-              ),
-              label: Text(
-                cartitem.toString(),
-                style: TextStyle(color: Colors.white),
-              )),
+          Visibility(
+            visible: !_isAdmin,
+            child: TextButton.icon(
+                onPressed: () => {_goToCart()},
+                icon: Icon(
+                  Icons.shopping_cart,
+                  color: Colors.white,
+                ),
+                label: Text(
+                  cartitem.toString(),
+                  style: TextStyle(color: Colors.white),
+                )),
+          ),
         ],
       ),
       drawer: MyDrawer(user: widget.user),
@@ -217,14 +222,17 @@ class _MainScreenState extends State<MainScreen> {
                                             ],
                                           ),
                                         ),
-                                        Expanded(
-                                          flex: 1,
-                                          child: GestureDetector(
-                                            child: Icon(
-                                              Icons.add_shopping_cart,
-                                              color: Colors.indigo[900],
+                                        Visibility(
+                                          visible: !_isAdmin,
+                                          child: Expanded(
+                                            flex: 1,
+                                            child: GestureDetector(
+                                              child: Icon(
+                                                Icons.add_shopping_cart,
+                                                color: Colors.indigo[900],
+                                              ),
+                                              onTap: () => {_addToCart(index)},
                                             ),
-                                            onTap: () => {_addToCart(index)},
                                           ),
                                         ),
                                       ]),
@@ -239,10 +247,26 @@ class _MainScreenState extends State<MainScreen> {
                 )),
         ]),
       ),
+      floatingActionButton: Visibility(
+        visible: _isAdmin,
+        child: FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => NewProductForm()));
+          },
+          label: Text(
+            "Add",
+            style:
+                TextStyle(fontFamily: 'Georgia', fontWeight: FontWeight.bold),
+          ),
+          icon: Icon(Icons.add),
+        ),
+      ),
     );
   }
 
   void _loadProducts(String prname) {
+    checkAdmin();
     http.post(
         Uri.parse(
             "https://crimsonwebs.com/s272033/winfunggate/php/loadproducts.php"),
@@ -325,7 +349,6 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _loadCart() {
-    
     http.post(
         Uri.parse(
             "https://crimsonwebs.com/s272033/winfunggate/php/loadcartitem.php"),
@@ -334,6 +357,14 @@ class _MainScreenState extends State<MainScreen> {
         cartitem = int.parse(response.body);
         print(cartitem);
       });
+    });
+  }
+
+  void checkAdmin() {
+    setState(() {
+      if (widget.user.email == 'xnlee1999@gmail.com') {
+        _isAdmin = true;
+      }
     });
   }
 }
