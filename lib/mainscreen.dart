@@ -26,6 +26,11 @@ class _MainScreenState extends State<MainScreen> {
   TextEditingController _srcController = new TextEditingController();
   int cartitem = 0;
   bool _isAdmin = false;
+  TextEditingController _nameController = new TextEditingController();
+  TextEditingController _typeController = new TextEditingController();
+  TextEditingController _sizeController = new TextEditingController();
+  TextEditingController _priceController = new TextEditingController();
+  TextEditingController _qtyController = new TextEditingController();
 
   @override
   void initState() {
@@ -41,7 +46,7 @@ class _MainScreenState extends State<MainScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Discover our Products"),
+        title: _isAdmin ? Text("All Products") : Text('Discover our Products'),
         actions: [
           Visibility(
             visible: !_isAdmin,
@@ -235,6 +240,35 @@ class _MainScreenState extends State<MainScreen> {
                                             ),
                                           ),
                                         ),
+                                        Visibility(
+                                          visible: _isAdmin,
+                                          child: Expanded(
+                                            flex: 1,
+                                            child: Column(
+                                              children: [
+                                                GestureDetector(
+                                                  child: Icon(
+                                                    Icons.edit,
+                                                    color: Colors.indigo[900],
+                                                  ),
+                                                  onTap: () => {
+                                                    _editProductDialog(index)
+                                                  },
+                                                ),
+                                                SizedBox(height: 30),
+                                                GestureDetector(
+                                                  child: Icon(
+                                                    Icons.delete,
+                                                    color: Colors.indigo[900],
+                                                  ),
+                                                  onTap: () => {
+                                                    _deleteProductDialog(index)
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
                                       ]),
                                 ],
                               ),
@@ -251,8 +285,10 @@ class _MainScreenState extends State<MainScreen> {
         visible: _isAdmin,
         child: FloatingActionButton.extended(
           onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => NewProductForm()));
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => NewProductForm(user: widget.user)));
           },
           label: Text(
             "Add",
@@ -364,6 +400,221 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       if (widget.user.email == 'xnlee1999@gmail.com') {
         _isAdmin = true;
+      }
+    });
+  }
+
+  void _editProductDialog(int index) {
+    _nameController.text = _productList[index]['name'];
+    _typeController.text = _productList[index]['type'];
+    _sizeController.text = _productList[index]['size'];
+    _priceController.text = _productList[index]['price'];
+    _qtyController.text = _productList[index]['qty'];
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Edit This Product?"),
+            content: SingleChildScrollView(
+              child: new Container(
+                height: 320,
+                width: 300,
+                child: Column(
+                  children: [
+                    Container(
+                      height: 50,
+                      child: TextField(
+                        controller: _nameController,
+                        decoration: InputDecoration(
+                          labelText: "Name",
+                          contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 5),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    Container(
+                      height: 50,
+                      child: TextField(
+                        controller: _typeController,
+                        decoration: InputDecoration(
+                          labelText: "Type",
+                          contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 5),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    Container(
+                      height: 50,
+                      child: TextField(
+                        controller: _sizeController,
+                        decoration: InputDecoration(
+                          labelText: "Size",
+                          contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 5),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    Container(
+                      height: 50,
+                      child: TextField(
+                        controller: _priceController,
+                        decoration: InputDecoration(
+                          labelText: "Price (RM)",
+                          contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 5),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    Container(
+                      height: 50,
+                      child: TextField(
+                        controller: _qtyController,
+                        decoration: InputDecoration(
+                          labelText: "Quantity",
+                          contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 5),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                child: Text("Confirm",
+                    style: TextStyle(color: Theme.of(context).accentColor)),
+                onPressed: () {
+                  _editProduct(index);
+                  //Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: Text("Cancel",
+                    style: TextStyle(color: Theme.of(context).accentColor)),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        });
+  }
+
+  void _editProduct(int index) {
+    String prid = _productList[index]['id'];
+    String name = _nameController.text.toString();
+    String type = _typeController.text.toString();
+    String size = _sizeController.text.toString();
+    String price = _priceController.text.toString();
+    String qty = _qtyController.text.toString();
+
+    http.post(
+        Uri.parse(
+            "https://www.crimsonwebs.com/s272033/winfunggate/php/editproducts.php"),
+        body: {
+          "prid": prid,
+          "name": name,
+          "type": type,
+          "size": size,
+          "price": price,
+          "qty": qty,
+        }).then((response) {
+      print(response.body);
+      if (response.body == "success") {
+        Fluttertoast.showToast(
+            msg: "Edit Product Success.",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Theme.of(context).accentColor,
+            textColor: Colors.white,
+            fontSize: 16.0);
+        _loadProducts("");
+        Navigator.pop(context);
+      } else {
+        Fluttertoast.showToast(
+            msg: "Edit Product Failed",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Theme.of(context).accentColor,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
+    });
+  }
+
+  _deleteProductDialog(int index) {
+    showDialog(
+        builder: (context) => new AlertDialog(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                title: new Text(
+                  'Delete this product?',
+                  style: TextStyle(),
+                ),
+                content: new Text(
+                  'Are your sure?',
+                  style: TextStyle(),
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    child: Text("Yes",
+                        style: TextStyle(color: Theme.of(context).accentColor)),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _deleteProduct(index);
+                    },
+                  ),
+                  TextButton(
+                      child: Text("No",
+                          style:
+                              TextStyle(color: Theme.of(context).accentColor)),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      }),
+                ]),
+        context: context);
+  }
+
+  void _deleteProduct(int index) {
+    String prid = _productList[index]['id'];
+    print(prid);
+    http.post(
+        Uri.parse(
+            "https://www.crimsonwebs.com/s272033/winfunggate/php/deleteproducts.php"),
+        body: {
+          "prid": prid,
+        }).then((response) {
+      print(response.body);
+      if (response.body == "success") {
+        Fluttertoast.showToast(
+            msg: "Delete Product Success.",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Theme.of(context).accentColor,
+            textColor: Colors.white,
+            fontSize: 16.0);
+        _loadProducts("");
+        Navigator.pop(context);
+      } else {
+        Fluttertoast.showToast(
+            msg: "Delete Product Failed",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Theme.of(context).accentColor,
+            textColor: Colors.white,
+            fontSize: 16.0);
       }
     });
   }

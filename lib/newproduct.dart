@@ -8,9 +8,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:http/http.dart' as http;
 import 'package:winfung_gate/mainscreen.dart';
+import 'package:winfung_gate/user.dart';
 
 
 class NewProductForm extends StatefulWidget {
+  final User user;
+
+  const NewProductForm({Key key, this.user}) : super(key: key);
+
   @override
   _NewProductFormState createState() => _NewProductFormState();
 }
@@ -262,7 +267,7 @@ class _NewProductFormState extends State<NewProductForm> {
           return AlertDialog(
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(20.0))),
-            title: Text("Add New Product???"),
+            title: Text("Add New Product?"),
             content: Text("Are your sure?"),
             actions: [
               TextButton(
@@ -333,8 +338,9 @@ class _NewProductFormState extends State<NewProductForm> {
           _priceController.text = "";
           _qtyController.text = "";
         });
+        Navigator.of(context).pop();
         Navigator.push(context,
-            MaterialPageRoute(builder: (content) => MainScreen()));
+            MaterialPageRoute(builder: (content) => MainScreen(user: widget.user)));
       } else {
         Fluttertoast.showToast(
             msg: "Failed",

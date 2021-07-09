@@ -55,7 +55,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
   @override
   void initState() {
     super.initState();
-    _loadPref();
+    // _loadPref();
 
     _dateController.text = DateFormat('dd/MM/yyyy').format(DateTime.now());
     _timeController.text = formatDate(
@@ -658,12 +658,12 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
         });
   }
 
-  Future<void> _loadPref() async {
-    prefs = await SharedPreferences.getInstance();
-    _name = prefs.getString("name") ?? 'Click to set';
-    _phone = prefs.getString("phone") ?? 'Click to set';
-    setState(() {});
-  }
+  // Future<void> _loadPref() async {
+  //   prefs = await SharedPreferences.getInstance();
+  //   _name = prefs.getString("name") ?? 'Click to set';
+  //   _phone = prefs.getString("phone") ?? 'Click to set';
+  //   setState(() {});
+  // }
 
   _getUserCurrentLoc() async {
     ProgressDialog progressDialog = ProgressDialog(context,
@@ -918,6 +918,4 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
       }
     });
   }
-
-  
 }
