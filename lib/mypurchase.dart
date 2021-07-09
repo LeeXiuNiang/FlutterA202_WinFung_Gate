@@ -291,6 +291,26 @@ class _MyPurchaseState extends State<MyPurchase> {
                                             ),
                                           ),
                                           Visibility(
+                                            visible: !_isAdmin,
+                                            child: Expanded(
+                                              flex: 1,
+                                              child: Column(
+                                                children: [
+                                                  IconButton(
+                                                    icon: Icon(
+                                                      Icons.delete,
+                                                      color: Colors.indigo[900],
+                                                    ),
+                                                    onPressed: () {
+                                                      _deletePurchasedsDialog(
+                                                          index);
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          Visibility(
                                             visible: _isAdmin,
                                             child: Expanded(
                                               flex: 1,
@@ -431,4 +451,84 @@ class _MyPurchaseState extends State<MyPurchase> {
       }
     });
   }
+
+  void _deletePurchasedsDialog(int index) {
+    if (_purchaseList[index]['status'] != "completed") {
+      Fluttertoast.showToast(
+          msg: "You can only delete a purchase history which is completed!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.redAccent[700],
+          textColor: Colors.white,
+          fontSize: 16.0);
+      return;
+    } else {
+      showDialog(
+          builder: (context) => new AlertDialog(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                  title: new Text(
+                    'Delete this purchase history?',
+                    style: TextStyle(),
+                  ),
+                  content: new Text(
+                    'Are your sure?',
+                    style: TextStyle(),
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text("Yes",
+                          style:
+                              TextStyle(color: Theme.of(context).accentColor)),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _deletePurchased(index);
+                      },
+                    ),
+                    TextButton(
+                        child: Text("No",
+                            style: TextStyle(
+                                color: Theme.of(context).accentColor)),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        }),
+                  ]),
+          context: context);
+    }
+  }
+
+  void _deletePurchased(int index) {
+    http.post(
+        Uri.parse(
+            "https://crimsonwebs.com/s272033/winfunggate/php/deletepurchased.php"),
+        body: {
+          "email": widget.user.email,
+          "prid": _purchaseList[index]['prid'],
+          "orderid": _purchaseList[index]['orderid'],
+        }).then((response) {
+      print(response.body);
+      if (response.body == "success") {
+        Fluttertoast.showToast(
+            msg: "Delete Purchase History Success",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Theme.of(context).accentColor,
+            textColor: Colors.white,
+            fontSize: 16.0);
+        _loadPurchaseHistory();
+      } else {
+        Fluttertoast.showToast(
+            msg: "Delete Purchase History Failed",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.redAccent[700],
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
+    });
+  }
+  
 }
