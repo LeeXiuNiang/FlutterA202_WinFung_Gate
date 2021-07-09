@@ -303,6 +303,26 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
                                               ),
                                             ),
                                           ),
+                                          Visibility(
+                                            visible: !_isAdmin,
+                                            child: Expanded(
+                                              flex: 1,
+                                              child: Column(
+                                                children: [
+                                                  IconButton(
+                                                    icon: Icon(
+                                                      Icons.delete,
+                                                      color: Colors.indigo[900],
+                                                    ),
+                                                    onPressed: () {
+                                                      _deleteBookingsDialog(
+                                                          index);
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
                                         ],
                                       )))));
                     }));
@@ -419,6 +439,85 @@ class _MyBookingState extends State<MyBooking> with WidgetsBindingObserver {
     setState(() {
       if (widget.user.email == 'xnlee1999@gmail.com') {
         _isAdmin = true;
+      }
+    });
+  }
+
+  _deleteBookingsDialog(int index) {
+    if (_bookingList[index]['status'] != "completed") {
+      Fluttertoast.showToast(
+          msg: "You can only delete a booking which is completed!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.redAccent[700],
+          textColor: Colors.white,
+          fontSize: 16.0);
+      return;
+    } else {
+      showDialog(
+          builder: (context) => new AlertDialog(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                  title: new Text(
+                    'Delete this booking?',
+                    style: TextStyle(),
+                  ),
+                  content: new Text(
+                    'Are your sure?',
+                    style: TextStyle(),
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text("Yes",
+                          style:
+                              TextStyle(color: Theme.of(context).accentColor)),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _deleteBookings(index);
+                      },
+                    ),
+                    TextButton(
+                        child: Text("No",
+                            style: TextStyle(
+                                color: Theme.of(context).accentColor)),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        }),
+                  ]),
+          context: context);
+    }
+  }
+
+  void _deleteBookings(int index) {
+    
+    http.post(
+        Uri.parse(
+            "https://crimsonwebs.com/s272033/winfunggate/php/deletebookings.php"),
+        body: {
+          "email": widget.user.email,
+          "rbid": _bookingList[index]['id'],
+        }).then((response) {
+      print(response.body);
+      if (response.body == "success") {
+        Fluttertoast.showToast(
+            msg: "Delete Booking Success",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Theme.of(context).accentColor,
+            textColor: Colors.white,
+            fontSize: 16.0);
+        _loadBookings();
+      } else {
+        Fluttertoast.showToast(
+            msg: "Delete Booking Failed",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.redAccent[700],
+            textColor: Colors.white,
+            fontSize: 16.0);
       }
     });
   }
