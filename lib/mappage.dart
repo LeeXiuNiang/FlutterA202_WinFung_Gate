@@ -73,7 +73,7 @@ class _MapPageState extends State<MapPage> {
                           children: [
                             SizedBox(height: 10),
                             Text(
-                                "Please select your delivery location from map",
+                                "Please select your installation location from map",
                                 style: TextStyle(
                                     fontSize: 16, fontWeight: FontWeight.bold)),
                             Container(
@@ -103,12 +103,14 @@ class _MapPageState extends State<MapPage> {
                                   Expanded(
                                       flex: 4,
                                       child: Container(
-                                          child: ElevatedButton(
+                                          child: MaterialButton(
+                                            
                                               onPressed: () {
                                                 Navigator.pop(
                                                     context, _delivery);
                                               },
-                                              child: Text("Save"))))
+                                              color: Theme.of(context).accentColor,
+                                              child: Text("Save",style: TextStyle(color: Colors.white),))))
                                 ],
                               ),
                             ),
