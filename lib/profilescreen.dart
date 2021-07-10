@@ -167,6 +167,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _changeUsernameDialog() {
+    _usernamecontroller.text=widget.user.username;
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -196,7 +197,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         controller: _usernamecontroller,
                         decoration: InputDecoration(
                           labelText: "New Username",
-                          hintText: widget.user.username,
+                           contentPadding: EdgeInsets.fromLTRB(0, 0, 0, 5),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(40),
                           ),
@@ -221,7 +222,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Text("Cancel",
                     style: TextStyle(color: Theme.of(context).accentColor)),
                 onPressed: () {
-                  _usernamecontroller.text = "";
+                  
                   Navigator.of(context).pop();
                 },
               ),
